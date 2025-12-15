@@ -1,0 +1,778 @@
+{
+  "name": "Flusso 14",
+  "nodes": [
+    {
+      "parameters": {
+        "description": "=Il contatto ha risposto alla mail di follow-up.\n\nDettagli contatto:\n- Email: {{$json[\"email\"]}}\n- Oggetto mail: {{$json[\"subject\"]}}\n- ID messaggio a cui risponde: {{$json[\"messageId\"]}}\n\nIl contatto è stato valutato dal nostro AI e risulta interessante.\nProcedere con il follow-up tramite l’email inviata o contattare il cliente per approfondimento.\n",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.zendesk",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        592
+      ],
+      "id": "6bf210ac-750e-4618-a046-e7a75ee627cc",
+      "name": "Create a ticket",
+      "credentials": {
+        "zendeskApi": {
+          "id": "rn0FxV25O2m7BPW4",
+          "name": "Zendesk account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09FHT98TB4",
+          "mode": "list",
+          "cachedResultName": "nuovo-canale"
+        },
+        "text": "==🚨 NUOVO LEAD HOT! 🚨Link Ticket:** {{$json[\"url\"]}}\\n\\nFollow-up inviato automaticamente. Attendiamo risposta in Zendesk.",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1952,
+        592
+      ],
+      "id": "c0ca1983-ed13-420f-9094-b9f2761552b8",
+      "name": "Send a message2",
+      "webhookId": "4f63aaef-f09e-4aa9-bed1-8f3dd5274fdb",
+      "credentials": {
+        "slackApi": {
+          "id": "m1TsDMGuX9zpvfa2",
+          "name": "Slack account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        1040,
+        608
+      ],
+      "id": "6248ed5e-ba0e-4750-a252-da6a76540c82",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "CGksUiurAdsIZwDF",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e9259968-7c13-4055-abe8-a0a2b2c6b653",
+              "name": "email",
+              "value": "=$json[\"from\"][\"value\"][0][\"address\"]",
+              "type": "string"
+            },
+            {
+              "id": "02dd7fa8-109a-415f-9e8e-23fc7ee55cfb",
+              "name": "subject",
+              "value": "=$json[\"subject\"]",
+              "type": "string"
+            },
+            {
+              "id": "7834fb17-d4a5-42cb-bf9e-ddeb90dfd50b",
+              "name": "messageId",
+              "value": "$json[\\\"inReplyTo\\\"]",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1472,
+        592
+      ],
+      "id": "edd7bfc3-79e3-4bd2-bef1-5ce8e20d57c2",
+      "name": "Prepara ticket"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5fff0b3c-2d8b-4f1f-8f64-926402d7aed1",
+              "leftValue": "={{$json[\"subject\"]}}\n",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "9d839307-6af4-4a9c-aeab-84c51fe63696",
+              "leftValue": "={{$json[\"subject\"]}}",
+              "rightValue": "Re:",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1248,
+        608
+      ],
+      "id": "83174532-a243-494a-ac9f-2dd3ec5100fe",
+      "name": "Controllo risposta"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{$json[\"email\"]}}",
+        "subject": "Grazie per aver completato il sondaggio",
+        "message": "=Ciao {{$json[\"nome\"]}} {{$json[\"cognome\"]}},\t",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        688,
+        784
+      ],
+      "id": "ec0324d5-d341-4d2e-b8d0-b9a7a750f5c6",
+      "name": "Email cortesia",
+      "webhookId": "fc234fb2-b48f-4a88-9d68-dfa2fa042ca6",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "CGksUiurAdsIZwDF",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "96898ecf-98c2-4692-bef5-c2873d719410",
+              "name": "nome",
+              "value": "={{$json[\"nome\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "0bb11647-d4e4-4c11-a46a-74197e30a478",
+              "name": "cognome",
+              "value": "={{$json[\"cognome\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "4828a330-5d61-41a9-a8d3-db8220680ffb",
+              "name": "email",
+              "value": "={{$json[\"email\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "f845987c-8e31-4c46-8ef9-7401a2c0a092",
+              "name": "budget",
+              "value": "={{$json[\"budget\"]}}",
+              "type": "number"
+            },
+            {
+              "id": "efc53ef7-ee95-4dcd-ae48-fba22791e8c3",
+              "name": "nazione",
+              "value": "={{$json[\"motivazione\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "f46ab7c4-7a05-486c-931e-f9b3c42a251f",
+              "name": "valutazione",
+              "value": "={{$json[\"output\"][\"valutazione\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "e61e2e6f-e857-4b0e-8ece-841dde52f063",
+              "name": "punteggio",
+              "value": "={{$json[\"output\"][\"punteggio\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "d91625d8-e6b5-45f7-9318-b0b2fbe2c97d",
+              "name": "azioneSuggerita",
+              "value": "={{$json[\"output\"][\"azioneSuggerita\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "dbc79e01-5d46-422e-9b47-45ea7e2ab07d",
+              "name": "motivazioneAnalisi",
+              "value": "={{$json[\"output\"][\"motivazioneAnalisi\"]}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        512,
+        784
+      ],
+      "id": "1e334dd4-93ee-44f3-9db3-e37b02b55681",
+      "name": "Prepara email1"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "newfarm",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -752,
+        624
+      ],
+      "id": "38c77b0c-1b1b-4b84-ab75-0ed41806187e",
+      "name": "Webhook1",
+      "webhookId": "aee7bd25-8a86-4795-a242-43afceccb626"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  return {\n    json: {\n      nome: item.json.body.data.data.nome,\n      cognome: item.json.body.data.data.Cognome,\n      email: item.json.body.data.data.Email,\n      budget: item.json.body.data.data.Budget,\n      nazione: item.json.body.data.data.Nazione,\n      motivazione: item.json.body.data.data.Motivazione,\n      surveyId: item.json.body.data.surveyId,\n      endingId: item.json.body.data.endingId\n    }\n  };\n});\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -496,
+        624
+      ],
+      "id": "062d68b2-e0da-47af-9f62-a42200bc2575",
+      "name": "Estrai payload1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analizza il seguente contatto raccolto tramite una survey relativa a ventagli artistici di fascia medio-alta.\n\nDati del contatto:\n\nNome: {{$json[\"nome\"]}} {{$json[\"cognome\"]}}\n\nEmail: {{$json[\"email\"]}}\n\nNazione: {{$json[\"nazione\"]}}\n\nBudget dichiarato: {{$json[\"budget\"]}}\n\nMotivazione: {{$json[\"motivazione\"]}}\n\nConsidera che:\n\nI ventagli sono pezzi d’arte artigianali con valore culturale e collezionistico.\n\nUn budget adeguato per un cliente realmente interessato è generalmente sopra i 400–500 €.\n\nUn contatto è interessante se mostra gusto estetico, consapevolezza artistica o intenzione di acquisto concreta.\n\nÈ poco interessante se la motivazione è superficiale o puramente estetica senza reale potere d’acquisto.\n\nRestituisci esclusivamente un oggetto JSON strutturato \n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -288,
+        752
+      ],
+      "id": "450bbb53-164e-4e6c-b116-5f2dc5863c5e",
+      "name": "AI Agent3"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        976
+      ],
+      "id": "4d5f2b68-4fdc-44b8-8633-59386ed000e5",
+      "name": "Google Gemini Chat Model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "6xAGhA9zHQNia7ZG",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"valutazione\": {\n      \"type\": \"string\",\n      \"enum\": [\"alta\", \"bassa\"],\n      \"description\": \"Livello di interesse del contatto verso i ventagli artistici\"\n    },\n    \"punteggio\": {\n      \"type\": \"number\",\n      \"description\": \"Valutazione numerica da 0 a 100\"\n    },\n    \"motivazioneAnalisi\": {\n      \"type\": \"string\",\n      \"description\": \"Breve spiegazione del motivo della valutazione\"\n    },\n    \"categoria\": {\n      \"type\": \"string\",\n      \"enum\": [\"interessato\", \"poco_interessato\"],\n      \"description\": \"Classificazione del lead\"\n    },\n    \"azioneSuggerita\": {\n      \"type\": \"string\",\n      \"enum\": [\"follow_up\", \"email_cortesia\"],\n      \"description\": \"Azione da intraprendere in base alla valutazione\"\n    }\n  },\n  \"required\": [\"valutazione\", \"punteggio\", \"azioneSuggerita\"]\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -144,
+        976
+      ],
+      "id": "b659dee3-40f6-4045-8b34-03907ec06b1d",
+      "name": "Structured Output Parser3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "85dcf239-6e8b-4987-9c77-296c387ba0ff",
+              "leftValue": "={{$json[\"output\"][\"azioneSuggerita\"]}}",
+              "rightValue": "follow_up",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        320,
+        640
+      ],
+      "id": "76638f13-fa3a-4162-9c9c-45b17251b177",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        96,
+        640
+      ],
+      "id": "f5d96ad0-8941-46b3-ad39-03a0aa0f1371",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{$json[\"email\"]}}",
+        "subject": "Follow-up",
+        "message": "=<p>Ciao <strong>{{$json[\"nome\"]}} {{$json[\"cognome\"]}}</strong>,</p>\n\n<p>Siamo <strong>VentagliOrientali.com</strong>,</p>\n\n<p>\nGrazie per aver partecipato al nostro sondaggio sui ventagli artistici.<br>\nDalla nostra analisi il tuo profilo sembra molto interessante:<br>\n<em>{{$json[\"motivazioneAnalisi\"]}}</em>\n</p>\n\n<p>\nVorremmo fissare una breve chiamata di approfondimento (10–15 minuti) per mostrarti alcuni pezzi che potrebbero fare al caso tuo e discutere del budget.\n</p>\n\n<p>\nSe sei disponibile, rispondi a questa email indicando uno o due slot orari che preferisci (es. “Mercoledì 10:00” o “Venerdì 15:00”).<br>\nIn alternativa, scrivi semplicemente “Sono disponibile” e ti ricontatteremo per concordare l'orario.\n</p>\n\n<hr>\n\n<p><strong>Dettagli che hai fornito:</strong><br>\n- Budget dichiarato: {{$json[\"budget\"]}} €<br>\n- Nazione: {{$json[\"nazione\"]}}\n</p>\n\n<p>Un saluto,<br>\n<em>ventagliorientali.darte@example.com</em></p>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        688,
+        560
+      ],
+      "id": "f07388c1-05cb-4452-9f7c-7b824c19f6c9",
+      "name": "Follow-up1",
+      "webhookId": "f5b995ae-795a-4fb5-936c-c4413aad61da",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "CGksUiurAdsIZwDF",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "96898ecf-98c2-4692-bef5-c2873d719410",
+              "name": "nome",
+              "value": "={{$json[\"nome\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "0bb11647-d4e4-4c11-a46a-74197e30a478",
+              "name": "cognome",
+              "value": "={{$json[\"cognome\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "4828a330-5d61-41a9-a8d3-db8220680ffb",
+              "name": "email",
+              "value": "={{$json[\"email\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "f845987c-8e31-4c46-8ef9-7401a2c0a092",
+              "name": "budget",
+              "value": "={{$json[\"budget\"]}}",
+              "type": "number"
+            },
+            {
+              "id": "efc53ef7-ee95-4dcd-ae48-fba22791e8c3",
+              "name": "nazione",
+              "value": "={{$json[\"motivazione\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "f46ab7c4-7a05-486c-931e-f9b3c42a251f",
+              "name": "valutazione",
+              "value": "={{$json[\"output\"][\"valutazione\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "e61e2e6f-e857-4b0e-8ece-841dde52f063",
+              "name": "punteggio",
+              "value": "={{$json[\"output\"][\"punteggio\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "d91625d8-e6b5-45f7-9318-b0b2fbe2c97d",
+              "name": "azioneSuggerita",
+              "value": "={{$json[\"output\"][\"azioneSuggerita\"]}}",
+              "type": "string"
+            },
+            {
+              "id": "dbc79e01-5d46-422e-9b47-45ea7e2ab07d",
+              "name": "motivazioneAnalisi",
+              "value": "={{$json[\"output\"][\"motivazioneAnalisi\"]}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        512,
+        560
+      ],
+      "id": "89f02546-095c-4661-bf3c-4b1f6a7f2f16",
+      "name": "Prepara mail2"
+    }
+  ],
+  "pinData": {
+    "Gmail Trigger": [
+      {
+        "json": {
+          "id": "19a3154f9ca75abf",
+          "threadId": "19a312a37e92b92c",
+          "labelIds": [
+            "UNREAD",
+            "IMPORTANT",
+            "SENT",
+            "INBOX"
+          ],
+          "sizeEstimate": 4339,
+          "headers": {
+            "mime-version": "MIME-Version: 1.0",
+            "date": "Date: Wed, 29 Oct 2025 19:57:22 +0100",
+            "references": "References: <CAJBpyx02-AamVv7Y3MS7GoR2HFG-Re2Oo=yNFSaU1ffUVRrM6A@mail.gmail.com>",
+            "in-reply-to": "In-Reply-To: <CAJBpyx02-AamVv7Y3MS7GoR2HFG-Re2Oo=yNFSaU1ffUVRrM6A@mail.gmail.com>",
+            "message-id": "Message-ID: <CAJBpyx1iw+4hdXdmqjrY_+72Q5=52seJxi3LwG0SMFQz6JzB1A@mail.gmail.com>",
+            "subject": "Subject: Re: Follow-up",
+            "from": "From: Ilenia Unida <ileniaunidawork@gmail.com>",
+            "to": "To: ileniaunidawork@gmail.com",
+            "content-type": "Content-Type: multipart/alternative; boundary=\"000000000000eda587064250b373\""
+          },
+          "html": "<div dir=\"ltr\">mail di follow up per test</div><br><div class=\"gmail_quote gmail_quote_container\"><div dir=\"ltr\" class=\"gmail_attr\">Il giorno mer 29 ott 2025 alle ore 19:10 &lt;<a href=\"mailto:ileniaunidawork@gmail.com\">ileniaunidawork@gmail.com</a>&gt; ha scritto:<br></div><blockquote class=\"gmail_quote\" style=\"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex\">\n\t\t\t<p>Ciao <strong>Ilenia Unida</strong>,</p>\n\n<p>Siamo <strong>VentagliOrientali.com</strong>,</p>\n\n<p>\nGrazie per aver partecipato al nostro sondaggio sui ventagli artistici.<br>\nDalla nostra analisi il tuo profilo sembra molto interessante:<br>\n<em>Il contatto dichiara un budget elevato (1000€) e una forte passione per l&#39;arte orientale, che si allinea perfettamente con il valore culturale e artistico dei ventagli proposti.</em>\n</p>\n\n<p>\nVorremmo fissare una breve chiamata di approfondimento (10–15 minuti) per mostrarti alcuni pezzi che potrebbero fare al caso tuo e discutere del budget.\n</p>\n\n<p>\nSe sei disponibile, rispondi a questa email indicando uno o due slot orari che preferisci (es. “Mercoledì 10:00” o “Venerdì 15:00”).<br>\nIn alternativa, scrivi semplicemente “Sono disponibile” e ti ricontatteremo per concordare l&#39;orario.\n</p>\n\n<hr>\n\n<p><strong>Dettagli che hai fornito:</strong><br>\n- Budget dichiarato: 1000 €<br>\n- Nazione: Sono una grande appassionata di arte orientale\n</p>\n\n<p>Un saluto,<br>\n<em><a href=\"mailto:ventagliorientali.darte@example.com\" target=\"_blank\">ventagliorientali.darte@example.com</a></em></p>\n\t\t\t<br>\n\t\t\t<br>\n\t\t\t---\n\t\t\t<br>\n\t\t\t<em>This email was sent automatically with <a href=\"https://n8n.io/?utm_source=n8n-internal&amp;utm_medium=powered_by&amp;utm_campaign=n8n-nodes-base.gmail_523f07dcf9128667589cee1ffcfd8668cfdcb44b6a0a9dc8cac1f8d46ca0d50f\" target=\"_blank\">n8n</a></em>\n\t\t\t\n</blockquote></div>\n",
+          "text": "mail di follow up per test\n\nIl giorno mer 29 ott 2025 alle ore 19:10 <ileniaunidawork@gmail.com> ha\nscritto:\n\n> Ciao *Ilenia Unida*,\n>\n> Siamo *VentagliOrientali.com*,\n>\n> Grazie per aver partecipato al nostro sondaggio sui ventagli artistici.\n> Dalla nostra analisi il tuo profilo sembra molto interessante:\n> *Il contatto dichiara un budget elevato (1000€) e una forte passione per\n> l'arte orientale, che si allinea perfettamente con il valore culturale e\n> artistico dei ventagli proposti.*\n>\n> Vorremmo fissare una breve chiamata di approfondimento (10–15 minuti) per\n> mostrarti alcuni pezzi che potrebbero fare al caso tuo e discutere del\n> budget.\n>\n> Se sei disponibile, rispondi a questa email indicando uno o due slot orari\n> che preferisci (es. “Mercoledì 10:00” o “Venerdì 15:00”).\n> In alternativa, scrivi semplicemente “Sono disponibile” e ti\n> ricontatteremo per concordare l'orario.\n> ------------------------------\n>\n> *Dettagli che hai fornito:*\n> - Budget dichiarato: 1000 €\n> - Nazione: Sono una grande appassionata di arte orientale\n>\n> Un saluto,\n> *ventagliorientali.darte@example.com <ventagliorientali.darte@example.com>*\n>\n>\n> ---\n> *This email was sent automatically with n8n\n> <https://n8n.io/?utm_source=n8n-internal&utm_medium=powered_by&utm_campaign=n8n-nodes-base.gmail_523f07dcf9128667589cee1ffcfd8668cfdcb44b6a0a9dc8cac1f8d46ca0d50f>*\n",
+          "textAsHtml": "<p>mail di follow up per test</p><p>Il giorno mer 29 ott 2025 alle ore 19:10 &lt;<a href=\"mailto:ileniaunidawork@gmail.com\">ileniaunidawork@gmail.com</a>&gt; ha<br/>scritto:</p><p>&gt; Ciao *Ilenia Unida*,<br/>&gt;<br/>&gt; Siamo *<a href=\"http://VentagliOrientali.com\">VentagliOrientali.com</a>*,<br/>&gt;<br/>&gt; Grazie per aver partecipato al nostro sondaggio sui ventagli artistici.<br/>&gt; Dalla nostra analisi il tuo profilo sembra molto interessante:<br/>&gt; *Il contatto dichiara un budget elevato (1000&euro;) e una forte passione per<br/>&gt; l&apos;arte orientale, che si allinea perfettamente con il valore culturale e<br/>&gt; artistico dei ventagli proposti.*<br/>&gt;<br/>&gt; Vorremmo fissare una breve chiamata di approfondimento (10&ndash;15 minuti) per<br/>&gt; mostrarti alcuni pezzi che potrebbero fare al caso tuo e discutere del<br/>&gt; budget.<br/>&gt;<br/>&gt; Se sei disponibile, rispondi a questa email indicando uno o due slot orari<br/>&gt; che preferisci (es. &ldquo;Mercoled&igrave; 10:00&rdquo; o &ldquo;Venerd&igrave; 15:00&rdquo;).<br/>&gt; In alternativa, scrivi semplicemente &ldquo;Sono disponibile&rdquo; e ti<br/>&gt; ricontatteremo per concordare l&apos;orario.<br/>&gt; ------------------------------<br/>&gt;<br/>&gt; *Dettagli che hai fornito:*<br/>&gt; - Budget dichiarato: 1000 &euro;<br/>&gt; - Nazione: Sono una grande appassionata di arte orientale<br/>&gt;<br/>&gt; Un saluto,<br/>&gt; *ventagliorientali.darte@example.com &lt;<a href=\"mailto:ventagliorientali.darte@example.com\">ventagliorientali.darte@example.com</a>&gt;*<br/>&gt;<br/>&gt;<br/>&gt; ---<br/>&gt; *This email was sent automatically with n8n<br/>&gt; &lt;<a href=\"https://n8n.io/?utm_source=n8n-internal&utm_medium=powered_by&utm_campaign=n8n-nodes-base.gmail_523f07dcf9128667589cee1ffcfd8668cfdcb44b6a0a9dc8cac1f8d46ca0d50f\">https://n8n.io/?utm_source=n8n-internal&utm_medium=powered_by&utm_campaign=n8n-nodes-base.gmail_523f07dcf9128667589cee1ffcfd8668cfdcb44b6a0a9dc8cac1f8d46ca0d50f</a>&gt;*</p>",
+          "subject": "Re: Follow-up",
+          "references": "<CAJBpyx02-AamVv7Y3MS7GoR2HFG-Re2Oo=yNFSaU1ffUVRrM6A@mail.gmail.com>",
+          "date": "2025-10-29T18:57:22.000Z",
+          "to": {
+            "value": [
+              {
+                "address": "ileniaunidawork@gmail.com",
+                "name": ""
+              }
+            ],
+            "html": "<span class=\"mp_address_group\"><a href=\"mailto:ileniaunidawork@gmail.com\" class=\"mp_address_email\">ileniaunidawork@gmail.com</a></span>",
+            "text": "ileniaunidawork@gmail.com"
+          },
+          "from": {
+            "value": [
+              {
+                "address": "ileniaunidawork@gmail.com",
+                "name": "Ilenia Unida"
+              }
+            ],
+            "html": "<span class=\"mp_address_group\"><span class=\"mp_address_name\">Ilenia Unida</span> &lt;<a href=\"mailto:ileniaunidawork@gmail.com\" class=\"mp_address_email\">ileniaunidawork@gmail.com</a>&gt;</span>",
+            "text": "\"Ilenia Unida\" <ileniaunidawork@gmail.com>"
+          },
+          "messageId": "<CAJBpyx1iw+4hdXdmqjrY_+72Q5=52seJxi3LwG0SMFQz6JzB1A@mail.gmail.com>",
+          "inReplyTo": "<CAJBpyx02-AamVv7Y3MS7GoR2HFG-Re2Oo=yNFSaU1ffUVRrM6A@mail.gmail.com>"
+        }
+      }
+    ],
+    "Webhook1": [
+      {
+        "json": {
+          "headers": {
+            "host": "ilenia3.app.n8n.cloud",
+            "user-agent": "node",
+            "content-length": "853",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "accept-language": "*",
+            "baggage": "sentry-environment=production,sentry-release=4.0.1,sentry-public_key=f04fb0e18badd6412c9671e4b59b27ab,sentry-trace_id=d5d69a17da20d492faa64deada1919f5,sentry-org_id=4504315602993152,sentry-sampled=false,sentry-sample_rand=0.48023120793944507,sentry-sample_rate=0",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-connecting-ip": "3.64.29.144",
+            "cf-ew-via": "15",
+            "cf-ipcountry": "DE",
+            "cf-ray": "995dba2dd14a4dbb-FRA",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-worker": "n8n.cloud",
+            "content-type": "application/json",
+            "sec-fetch-mode": "cors",
+            "sentry-trace": "d5d69a17da20d492faa64deada1919f5-8bf66ed5894d99b2-0",
+            "x-forwarded-for": "3.64.29.144, 172.69.151.47",
+            "x-forwarded-host": "ilenia3.app.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik-prod-users-gwc-63-757945c69-8hs9x",
+            "x-is-trusted": "yes",
+            "x-real-ip": "3.64.29.144"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "webhookId": "cmhatt6t104hkad014hv3zcr5",
+            "event": "responseFinished",
+            "data": {
+              "id": "cmhb4545z357rad01zwha57f8",
+              "createdAt": "2025-10-28T22:03:14.904Z",
+              "updatedAt": "2025-10-28T22:04:07.813Z",
+              "surveyId": "cmh9tb20y30ajad01kp6mlbqe",
+              "displayId": "cmhb44zoe1yohad01durnyaas",
+              "contact": null,
+              "contactAttributes": null,
+              "finished": true,
+              "endingId": "trqmnpzew8u2c4cm1nwr9jvu",
+              "data": {
+                "nome": "Ilenia",
+                "Email": "ileniaunidawork@gmail.com",
+                "Budget": "1000",
+                "Cognome": "Unida",
+                "Nazione": "Sassari",
+                "Motivazione": "Sono una grande appassionata di arte orientale"
+              },
+              "variables": {},
+              "ttc": {
+                "nome": 5815,
+                "Email": 12363,
+                "Budget": 10577,
+                "_total": 56797,
+                "Cognome": 3616,
+                "Nazione": 4385,
+                "Motivazione": 20041
+              },
+              "tags": [],
+              "meta": {
+                "url": "https://app.formbricks.com/s/cmh9tb20y30ajad01kp6mlbqe",
+                "userAgent": {
+                  "browser": "Firefox",
+                  "os": "Windows",
+                  "device": "desktop"
+                }
+              },
+              "singleUseId": null,
+              "language": null
+            }
+          },
+          "webhookUrl": "https://ilenia3.app.n8n.cloud/webhook/newfarm",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Create a ticket": {
+      "main": [
+        [
+          {
+            "node": "Send a message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Controllo risposta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepara ticket": {
+      "main": [
+        [
+          {
+            "node": "Create a ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Controllo risposta": {
+      "main": [
+        [
+          {
+            "node": "Prepara ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepara email1": {
+      "main": [
+        [
+          {
+            "node": "Email cortesia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Estrai payload1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Estrai payload1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI Agent3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent3": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser3": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Prepara mail2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepara email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepara mail2": {
+      "main": [
+        [
+          {
+            "node": "Follow-up1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9e9e7f3d-7027-4381-b7c3-701befcfe46c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3eade08974c65ea0e714de990b1c4d4deb3f525e0d19f574aa90538cacfd42e4"
+  },
+  "id": "sO71lyBWrCk0grXB",
+  "tags": []
+}
